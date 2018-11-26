@@ -1,0 +1,55 @@
+<div class="container">
+
+
+<div class="text-center">
+      <div class="row">
+        <div class="col-sm-4"></div>
+        <div class="col-sm-4 ">
+            <h2>{{title}}</h2>
+            <input type="text" #searchInput class="form-control">
+        </div>
+      </div>
+
+      <div *ngIf="searchService.getLinks('') | async as links" class="text-center mt-4">
+          <div *ngIf="searchService.isLoaded">
+            <table class="table table-bordered">
+              <thead>
+                <tr>
+                  <th  ><button type="button" class="btn btn-light btn-block" (click)="sort(links, 'id')">id</button></th>
+                  <th  ><button type="button" class="btn btn-light btn-block" (click)="sort(links, 'title')">Title</button></th>
+                  <th ><button type="button" class="btn btn-light btn-block"  (click)="sort(links, 'description')">Description</button></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let link of links">
+                  <td>
+                   {{link.id}}
+                  </td>
+                  <td>
+                    <a [href]="link.title">{{link.title}}</a>
+                  </td>
+                  <td>
+                    {{link.description}}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <p>total: {{links.length}}</p>
+          </div>
+      </div>
+      <div *ngIf="searchService.getErrors('') | async as errors;">
+          <div *ngIf="searchService.isLoaded">
+            <h2>Errors:</h2>
+            <ul *ngIf="errors">
+              <li>
+                {{errors}}
+              </li>
+            </ul>
+          </div>
+      </div>
+      <div  *ngIf="!searchService.isLoaded" >
+          <app-spinner></app-spinner>
+      </div>
+    </div>
+</div>
+

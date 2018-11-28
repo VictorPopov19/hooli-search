@@ -1,18 +1,14 @@
 <div class="container">
-
-
-<div class="text-center">
+    <div class="text-center">
       <div class="row">
         <div class="col-sm-4"></div>
         <div class="col-sm-4 ">
             <h2>{{title}}</h2>
-            <input type="text" #searchInput class="form-control">
+            <input type="text" #searchInput class="form-control" (keyup)="searchLinks.next(searchInput.value)">
         </div>
       </div>
-
-      <div *ngIf="searchService.getLinks('') | async as links" class="text-center mt-4">
-          <div *ngIf="searchService.isLoaded">
-            <table class="table table-bordered">
+      <div *ngIf=" links$ | async as links" class="text-center mt-4">
+            <table class="table table-bordered" *ngIf="!links.error">
               <thead>
                 <tr>
                   <th  ><button type="button" class="btn btn-light btn-block" (click)="sort(links, 'id')">id</button></th>
@@ -35,17 +31,10 @@
               </tbody>
             </table>
             <p>total: {{links.length}}</p>
-          </div>
-      </div>
-      <div *ngIf="searchService.getErrors('') | async as errors;">
-          <div *ngIf="searchService.isLoaded">
-            <h2>Errors:</h2>
-            <ul *ngIf="errors">
-              <li>
-                {{errors}}
-              </li>
-            </ul>
-          </div>
+            <div *ngIf="links.error">
+              <h3>Errors:</h3>
+                   {{links.error}}
+            </div>
       </div>
       <div  *ngIf="!searchService.isLoaded" >
           <app-spinner></app-spinner>

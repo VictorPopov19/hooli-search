@@ -1,11 +1,10 @@
-import {AfterViewInit, Component, ElementRef, ViewChild} from '@angular/core';
+import {Component} from '@angular/core';
 import {Link} from '../../class/link';
-import {Observable} from 'rxjs/Observable';
 import {SearchService} from '../../service/search.service';
-import 'rxjs/add/observable/fromEvent';
-import 'rxjs/add/operator/debounce';
-import 'rxjs/add/observable/interval';
-import 'rxjs/add/operator/map';
+import {Subject} from 'rxjs/Subject';
+import {
+   debounceTime, distinctUntilChanged, switchMap
+ } from 'rxjs/operators';
 
 @Component({
   selector: 'app-search-component',
@@ -13,30 +12,27 @@ import 'rxjs/add/operator/map';
   styleUrls: ['./search.component.css'],
   providers: [SearchService]
 })
-export class SearchComponent implements AfterViewInit {
 
- @ViewChild('searchInput') readonly search: ElementRef;
+export class SearchComponent {
+
  readonly title = 'Hooli search';
+ readonly searchLinks = new Subject<string>();
 
-  constructor(
+ /** ввод в строке поиска, получаем список ссылок*/
+ readonly links$ = this.searchLinks.pipe(
+                            debounceTime(1000),
+                            distinctUntilChanged(),
+                            switchMap((searchText: string) => {
+                              return this.searchService.list(searchText);
+                            }),
+                          );
+
+ constructor(
     readonly searchService: SearchService
   ) {}
 
-  ngAfterViewInit() {
-      Observable.fromEvent( this.search.nativeElement, 'keyup')
-        .debounce( (value: any) => {
-          if (value.key === 'Enter') {
-            return Observable.interval(0);
-          }
-          return Observable.interval(1000);
-        })
-        .map( value => value.target.value)
-        .subscribe((str) => {
-          this.searchService.list(str);
-      });
-  }
-
-  sort(links: Link[], fieldName: string) {
+/** обрабатываем клик на кнопки сортировки ссылок*/
+ sort(links: Link[], fieldName: string) {
     links.sort((a, b) => {
           if (a[fieldName] > b[fieldName]) {
             return 1;
@@ -46,7 +42,7 @@ export class SearchComponent implements AfterViewInit {
           }
           return 0;
         });
-  }
+ }
 
 }
 
